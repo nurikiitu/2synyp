@@ -367,8 +367,15 @@ button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation;
 const C={'e50ccf71d95a1ab93794ceb148317c85932c20bab280c7a134c1771a2b27e595':{n:'Айдаулетова Шынар',u:'2026-11-16',k:'4455'}};
 const PHONE='8 747 109 16 00';
 const DEV=(()=>{let d=null;try{d=localStorage.getItem('dev_id')}catch(e){}if(!d){d=Math.random().toString(36).slice(2,6).toUpperCase();try{localStorage.setItem('dev_id',d)}catch(e){}}return d})();
-const DEVNAME=(()=>{const u=navigator.userAgent;const os=/Android/i.test(u)?'Android':/iPhone|iPad|iPod/i.test(u)?'iOS':/Windows/i.test(u)?'Windows':/Mac/i.test(u)?'Mac':/Linux/i.test(u)?'Linux':'Басқа';
-  const t=/iPad|Tablet/i.test(u)||(/Android/i.test(u)&&!/Mobile/i.test(u))?'планшет':/Mobi|iPhone|Android/i.test(u)?'телефон':'компьютер';return os+' '+t})();
+const DEVNAME=(()=>{const u=navigator.userAgent,tp=navigator.maxTouchPoints||0,W=Math.max(screen.width,screen.height);
+  if(/iPhone/i.test(u))return 'iPhone';
+  if(/iPad/i.test(u)||(/Macintosh/i.test(u)&&tp>1))return 'iPad';
+  if(/Macintosh|Mac OS X/i.test(u))return 'MacBook / Mac';
+  if(/Android/i.test(u)){if(/Mobile/i.test(u))return 'Android телефон';return W>=1600?'Интерактивті тақта (Android)':'Android планшет'}
+  if(/Windows/i.test(u))return tp>0&&W>=1600?'Интерактивті тақта (Windows)':tp>0?'Windows сенсорлы':'Windows компьютер';
+  if(/CrOS/i.test(u))return 'Chromebook';
+  if(/Linux/i.test(u))return tp>0&&W>=1600?'Интерактивті тақта (Linux)':'Linux компьютер';
+  return 'Басқа құрылғы'})();
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
