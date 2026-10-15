@@ -352,6 +352,7 @@ button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation;
 .dfin .fbox{background:#fff;border-radius:34px;padding:30px 50px;text-align:center}.dfin h2{font-size:clamp(34px,4vw,60px);color:#2e7d32}.dfin p{font-size:clamp(26px,2.6vw,40px);font-weight:900;margin:8px 0 16px}
 .dfin .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.dfin .tbtn{background:#1e88e5;color:#fff}
 @media(max-width:700px){.gcard.duelcard{grid-column:span 2}#dgame.active{height:auto;min-height:100vh}.dsides{flex-direction:column}.dside.s1{flex-direction:row}.dq{font-size:18px}.dopt{font-size:16px;min-height:48px}.dtrack{height:100px}}
+#lic{position:fixed;right:10px;bottom:8px;z-index:90;background:rgba(0,0,0,.45);color:#fff;font:800 13px Nunito,sans-serif;padding:4px 12px;border-radius:12px;pointer-events:none}#lic b{font-weight:900}
 </style>
 </head>
 <body>
@@ -360,13 +361,20 @@ button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation;
 <div id="gate"><form class="gbox" id="gf"><div style="font-size:72px">🧠</div><h2>neuroUstaz · 2-сынып</h2><p>Кіру коды</p>
 <input id="gc" autocomplete="off" spellcheck="false" placeholder="КОД"><button class="tbtn gbtn">Кіру ➜</button><div class="gerr" id="ge"></div></form></div>
 <script>
-(function(){const H=['e50ccf71d95a1ab93794ceb148317c85932c20bab280c7a134c1771a2b27e595'];
+(function(){/* код → иесі, мерзімі (сол күннің соңына дейін) */
+const C={'e50ccf71d95a1ab93794ceb148317c85932c20bab280c7a134c1771a2b27e595':{n:'Айдаулетова Шынар',u:'2026-11-16'}};
+const PHONE='8 747 109 16 00';
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
-async function tryC(c){const h=await sha(c);if(H.includes(h)){try{localStorage.setItem('s2_ok',h)}catch(e){}g.style.display='none';return}er.textContent='Код қате. Қайта тексеріңіз.'}
+const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
+const fmt=d=>d.split('-').reverse().join('.');
+function enter(h){const c=C[h];g.style.display='none';const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
+function expired(){er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
+async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h)}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
 document.getElementById('gf').onsubmit=e=>{e.preventDefault();if(inp.value.trim())tryC(inp.value)};
 let ok=null;try{ok=localStorage.getItem('s2_ok')}catch(e){}const q=new URLSearchParams(location.search).get('code');
-if(H.includes(ok))g.style.display='none';else if(q)tryC(q);
+const v=valid(ok);if(v===1)enter(ok);else if(v===-1)expired();else if(q)tryC(q);
+setInterval(()=>{let k=null;try{k=localStorage.getItem('s2_ok')}catch(e){}if(k&&valid(k)===-1){g.style.display='';const l=document.getElementById('lic');l&&l.remove();expired()}},60000);
 window.logout1=()=>{try{localStorage.removeItem('s2_ok')}catch(e){}location.href=location.pathname};})();
 </script>
 <section id="home" class="screen active">
