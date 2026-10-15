@@ -353,7 +353,6 @@ button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation;
 .dfin .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}.dfin .tbtn{background:#1e88e5;color:#fff}
 @media(max-width:700px){.gcard.duelcard{grid-column:span 2}#dgame.active{height:auto;min-height:100vh}.dsides{flex-direction:column}.dside.s1{flex-direction:row}.dq{font-size:18px}.dopt{font-size:16px;min-height:48px}.dtrack{height:100px}}
 #lic{position:fixed;right:10px;bottom:8px;z-index:90;background:rgba(0,0,0,.45);color:#fff;font:800 13px Nunito,sans-serif;padding:4px 12px;border-radius:12px;pointer-events:none}#lic b{font-weight:900}
-#wm{position:fixed;inset:-50%;z-index:85;pointer-events:none;transform:rotate(-24deg);display:flex;flex-direction:column;justify-content:space-around;opacity:.07;overflow:hidden}#wm span{white-space:nowrap;font:900 34px Nunito,sans-serif;color:#000;letter-spacing:2px}
 @media print{body{display:none}}
 </style>
 </head>
@@ -371,7 +370,6 @@ const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=doc
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
 function enter(h){const c=C[h];g.style.display='none';
-  const wm=document.createElement('div');wm.id='wm';const t=(c.n+' · neuroUstaz   ').repeat(6);wm.innerHTML=Array.from({length:14},()=>`<span>${t}</span>`).join('');document.body.append(wm);
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h)}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
