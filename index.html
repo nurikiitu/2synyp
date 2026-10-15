@@ -376,12 +376,18 @@ const DEVNAME=(()=>{const u=navigator.userAgent,tp=navigator.maxTouchPoints||0,W
   if(/CrOS/i.test(u))return 'Chromebook';
   if(/Linux/i.test(u))return tp>0&&W>=1600?'Интерактивті тақта (Linux)':'Linux компьютер';
   return 'Басқа құрылғы'})();
+/* құрылғының «саусақ ізі»: браузер тазаланса да өзгермейді */
+const GPU=(()=>{try{const c=document.createElement('canvas'),g=c.getContext('webgl')||c.getContext('experimental-webgl');const e=g.getExtension('WEBGL_debug_renderer_info');
+  let r=e?g.getParameter(e.UNMASKED_RENDERER_WEBGL):g.getParameter(g.RENDERER);r=String(r).replace(/ANGLE \(|\)|Direct3D.*|vs_\S+|ps_\S+|\(0x[0-9A-F]+\)/gi,'').replace(/,.*$/,'').replace(/\s+/g,' ').trim();return r.slice(0,40)}catch(e){return '?'}})();
+const FP=(async()=>{let cv='';try{const c=document.createElement('canvas');c.width=240;c.height=60;const x=c.getContext('2d');x.textBaseline='top';x.font='16px Arial';x.fillStyle='#f60';x.fillRect(10,10,100,30);x.fillStyle='#069';x.fillText('neuroUstaz Ғ Ә 😊 4455',4,18);x.strokeStyle='rgba(120,30,200,.7)';x.arc(120,30,20,0,6);x.stroke();cv=c.toDataURL()}catch(e){}
+  const raw=[screen.width+'x'+screen.height,screen.colorDepth,devicePixelRatio,navigator.hardwareConcurrency,navigator.deviceMemory,navigator.platform,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,navigator.maxTouchPoints,GPU,cv].join('|');
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw));return [...new Uint8Array(b)].slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase().slice(0,5)})();
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
-function enter(h,how){const c=C[h];g.style.display='none';gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | құрылғы '+DEV+' ('+DEVNAME+')',c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · '+DEVNAME);
+function enter(h,how){const c=C[h];g.style.display='none';FP.then(fp=>gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | із '+fp+' | '+DEVNAME+' · '+screen.width+'×'+screen.height+' · '+GPU,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV));
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){gcEv('mezgil-bitti','Мерзімі біткен кодпен кіру әрекеті');er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h,'кірді')}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
