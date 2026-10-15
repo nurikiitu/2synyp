@@ -387,12 +387,23 @@ const FP=(async()=>{let cv='';try{const c=document.createElement('canvas');c.wid
     const buf=await Promise.race([ac.startRendering(),new Promise(r=>setTimeout(()=>r(null),800))]);if(buf){const d=buf.getChannelData(0);let sum=0;for(let i=4000;i<4400;i++)sum+=Math.abs(d[i]);au=sum.toFixed(6)}}}catch(e){}
   const raw=[fonts,au,navigator.userAgent.replace(/[\d.]+/g,''),screen.availWidth+'x'+screen.availHeight,screen.width+'x'+screen.height,screen.colorDepth,devicePixelRatio,navigator.hardwareConcurrency,navigator.deviceMemory,navigator.platform,navigator.language,Intl.DateTimeFormat().resolvedOptions().timeZone,navigator.maxTouchPoints,GPU,cv].join('|');
   const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(raw));return [...new Uint8Array(b)].slice(0,3).map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase().slice(0,5)})();
+/* телефон моделі */
+const MODEL=(async()=>{const u=navigator.userAgent;try{if(navigator.userAgentData&&navigator.userAgentData.getHighEntropyValues){const v=await navigator.userAgentData.getHighEntropyValues(['model','platformVersion']);if(v.model)return v.model}}catch(e){}
+  const m=u.match(/Android [\d.]+; ([^;)]+?)(?: Build|\))/);if(m&&m[1]!=='K')return m[1].trim();
+  if(/iPhone/.test(u)){const k=Math.min(screen.width,screen.height)+'x'+Math.max(screen.width,screen.height)+'@'+devicePixelRatio;
+    const T={'320x568@2':'iPhone SE (1)','375x667@2':'iPhone 6/7/8/SE','414x736@3':'iPhone 6+/7+/8+','375x812@3':'iPhone X/XS/11 Pro/12 mini/13 mini','414x896@2':'iPhone XR/11','414x896@3':'iPhone XS Max/11 Pro Max',
+      '390x844@3':'iPhone 12/13/14','428x926@3':'iPhone 12/13 Pro Max, 14 Plus','393x852@3':'iPhone 14 Pro/15/15 Pro/16','430x932@3':'iPhone 14 Pro Max/15 Plus/15 Pro Max/16 Plus','402x874@3':'iPhone 16 Pro','440x956@3':'iPhone 16 Pro Max'};return T[k]||'iPhone '+k}
+  return ''})();
+/* IP мекенжайы, қала, провайдер */
+const NET=(async()=>{const tm=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
+  try{const r=await Promise.race([fetch('https://ipwho.is/?lang=ru').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return `IP ${r.ip} (${[r.city,r.connection&&r.connection.isp].filter(Boolean).join(', ')})`}catch(e){}
+  try{const r=await Promise.race([fetch('https://api.ipify.org?format=json').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return 'IP '+r.ip}catch(e){}return 'IP ?'})();
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
-function enter(h,how){const c=C[h];g.style.display='none';FP.then(fp=>gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | із '+fp+' | '+DEVNAME+' · '+screen.width+'×'+screen.height+' · '+GPU,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV));
+function enter(h,how){const c=C[h];g.style.display='none';Promise.all([FP,MODEL,NET]).then(([fp,md,ip])=>gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | із '+fp+' | '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · '+GPU+' | '+ip,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV));
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){gcEv('mezgil-bitti','Мерзімі біткен кодпен кіру әрекеті');er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h,'кірді')}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
