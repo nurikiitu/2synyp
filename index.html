@@ -366,12 +366,15 @@ button{font-family:inherit;cursor:pointer;border:none;touch-action:manipulation;
 (function(){/* код → иесі, мерзімі (сол күннің соңына дейін) */
 const C={'e50ccf71d95a1ab93794ceb148317c85932c20bab280c7a134c1771a2b27e595':{n:'Айдаулетова Шынар',u:'2026-11-16',k:'4455'}};
 const PHONE='8 747 109 16 00';
+const DEV=(()=>{let d=null;try{d=localStorage.getItem('dev_id')}catch(e){}if(!d){d=Math.random().toString(36).slice(2,6).toUpperCase();try{localStorage.setItem('dev_id',d)}catch(e){}}return d})();
+const DEVNAME=(()=>{const u=navigator.userAgent;const os=/Android/i.test(u)?'Android':/iPhone|iPad|iPod/i.test(u)?'iOS':/Windows/i.test(u)?'Windows':/Mac/i.test(u)?'Mac':/Linux/i.test(u)?'Linux':'Басқа';
+  const t=/iPad|Tablet/i.test(u)||(/Android/i.test(u)&&!/Mobile/i.test(u))?'планшет':/Mobi|iPhone|Android/i.test(u)?'телефон':'компьютер';return os+' '+t})();
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
-function enter(h,how){const c=C[h];g.style.display='none';gcEv('kod-'+(c.k||'?')+'-'+(how||'ашылды'),c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты'));
+function enter(h,how){const c=C[h];g.style.display='none';gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | құрылғы '+DEV+' ('+DEVNAME+')',c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · '+DEVNAME);
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){gcEv('mezgil-bitti','Мерзімі біткен кодпен кіру әрекеті');er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h,'кірді')}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
