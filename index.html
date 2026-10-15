@@ -398,12 +398,18 @@ const MODEL=(async()=>{const u=navigator.userAgent;try{if(navigator.userAgentDat
 const NET=(async()=>{const tm=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{const r=await Promise.race([fetch('https://ipwho.is/?lang=ru').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return `IP ${r.ip} (${[r.city,r.connection&&r.connection.isp].filter(Boolean).join(', ')})`}catch(e){}
   try{const r=await Promise.race([fetch('https://api.ipify.org?format=json').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return 'IP '+r.ip}catch(e){}return 'IP ?'})();
+const T0=Date.now();
+const NOW=()=>{const d=new Date(),z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}.${z(d.getMonth()+1)}.${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
+const DUR=ms=>{const t=Math.round(ms/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60),sc=t%60;return (h?h+' сағ ':'')+(h||m?m+' мин ':'')+sc+' сек'};
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
-function enter(h,how){const c=C[h];g.style.display='none';Promise.all([FP,MODEL,NET]).then(([fp,md,ip])=>gcEv('kod-'+(c.k||'?')+' | '+(how||'ашылды')+' | із '+fp+' | '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · '+GPU+' | '+ip,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV));
+function enter(h,how){const c=C[h];g.style.display='none';const when=NOW();Promise.all([FP,MODEL,NET]).then(([fp,md,ip])=>{window.__fp=fp;gcEv('kod-'+(c.k||'?')+' | '+when+' | '+(how||'ашылды')+' | із '+fp+' | '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · '+GPU+' | '+ip,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV)});
+  let sent=false;const bye=()=>{if(sent)return;sent=true;const path='kod-'+(c.k||'?')+' | '+NOW()+' | шықты | із '+(window.__fp||'?')+' | сайтта '+DUR(Date.now()-T0)+' болды';
+    try{const u='https://neuroustaz.goatcounter.com/count?e=true&p='+encodeURIComponent(path)+'&t='+encodeURIComponent(c.n+' – шықты')+'&rnd='+Math.random();if(!(navigator.sendBeacon&&navigator.sendBeacon(u)))gcEv(path,c.n+' – шықты')}catch(e){}};
+  addEventListener('pagehide',bye);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')bye();else sent=false});
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){gcEv('mezgil-bitti','Мерзімі біткен кодпен кіру әрекеті');er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h,'кірді')}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
