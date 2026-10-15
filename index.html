@@ -399,17 +399,30 @@ const NET=(async()=>{const tm=ms=>new Promise(r=>setTimeout(()=>r(null),ms));
   try{const r=await Promise.race([fetch('https://ipwho.is/?lang=ru').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return `IP ${r.ip} (${[r.city,r.connection&&r.connection.isp].filter(Boolean).join(', ')})`}catch(e){}
   try{const r=await Promise.race([fetch('https://api.ipify.org?format=json').then(x=>x.json()),tm(3000)]);if(r&&r.ip)return 'IP '+r.ip}catch(e){}return 'IP ?'})();
 const NOW=()=>{const d=new Date(),z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}.${z(d.getMonth()+1)}.${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
+/* Firebase (Firestore REST) + Telegram: кодты 3-тен көп құрылғы ашса, хабар */
+const FB='https://firestore.googleapis.com/v1/projects/neuroustaz-324dd/databases/(default)/documents/devices/',FBK='AIzaSyBGOkJasSxBZKBVi9FOOAsVK146Itsv_5Y';
+const TG='8631088711:AAHaScVUDSTCl5NIZkuVGXnUM6qtlAWJCyE',TGID='1795185899',LIMIT=3;
+async function devWatch(code,name,fp,line){try{
+  const r=await fetch(FB+encodeURIComponent(code)+'?key='+FBK);let fps=[];
+  if(r.ok){const d=await r.json();fps=((d.fields&&d.fields.fps&&d.fields.fps.arrayValue&&d.fields.fps.arrayValue.values)||[]).map(v=>v.stringValue)}
+  if(fps.includes(fp))return;fps.push(fp);
+  await fetch(FB+encodeURIComponent(code)+'?key='+FBK+'&updateMask.fieldPaths=fps&updateMask.fieldPaths=n&updateMask.fieldPaths=t',{method:'PATCH',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({fields:{fps:{arrayValue:{values:fps.map(x=>({stringValue:x}))}},n:{stringValue:name},t:{stringValue:NOW()}}})});
+  if(fps.length>LIMIT){const txt=`⚠️ ${code} · ${name}\nКод ${fps.length}-ші құрылғыдан ашылды!\n\n${line}\n\nБарлық құрылғы: ${fps.join(', ')}`;
+    fetch('https://api.telegram.org/bot'+TG+'/sendMessage?chat_id='+TGID+'&text='+encodeURIComponent(txt),{mode:'no-cors'})}
+}catch(e){}}
 const gcEv=(path,title,n=0)=>{try{if(window.goatcounter&&window.goatcounter.count){window.goatcounter.count({path,title,event:true});return}}catch(e){}if(n<20)setTimeout(()=>gcEv(path,title,n+1),500)};
 const sha=async s=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('2synyp:'+s.trim().toUpperCase()));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
 const g=document.getElementById('gate'),inp=document.getElementById('gc'),er=document.getElementById('ge');
 const valid=h=>{const c=C[h];if(!c)return 0;if(c.u&&new Date()>new Date(c.u+'T23:59:59'))return -1;return 1};
 const fmt=d=>d.split('-').reverse().join('.');
-function enter(h,how){const c=C[h];g.style.display='none';const when=NOW();Promise.all([FP,MODEL,NET]).then(([fp,md,ip])=>{window.__fp=fp;gcEv('kod-'+(c.k||'?')+' | '+when+' | '+(how||'ашылды')+' | із '+fp+' | '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · '+GPU+' | '+ip,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV)});
+function enter(h,how){const c=C[h];g.style.display='none';const when=NOW();Promise.all([FP,MODEL,NET]).then(([fp,md,ip])=>{window.__fp=fp;devWatch(c.k||'?',c.n,fp,'🕐 '+when+'\n📱 '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · із '+fp+'\n🌐 '+ip);gcEv('kod-'+(c.k||'?')+' | '+when+' | '+(how||'ашылды')+' | із '+fp+' | '+(md?(md.startsWith(DEVNAME)?md:DEVNAME+' '+md):DEVNAME)+' · '+screen.width+'×'+screen.height+' · '+GPU+' | '+ip,c.n+(how==='кірді'?' – кодпен кірді':' – сайтты ашты')+' · құрылғы '+DEV)});
   const b=document.createElement('div');b.id='lic';b.innerHTML=`🔒 Лицензия: <b>${c.n}</b>${c.u?` · ${fmt(c.u)} дейін`:''}`;document.body.append(b)}
 function expired(){gcEv('mezgil-bitti','Мерзімі біткен кодпен кіру әрекеті');er.innerHTML=`Кодтың мерзімі бітті.<br>Ұзарту үшін хабарласыңыз: <b>${PHONE}</b>`;try{localStorage.removeItem('s2_ok')}catch(e){}}
 async function tryC(c){const h=await sha(c);const v=valid(h);if(v===1){try{localStorage.setItem('s2_ok',h)}catch(e){}return enter(h,'кірді')}if(v===-1)return expired();er.textContent='Код қате. Қайта тексеріңіз.'}
 document.getElementById('gf').onsubmit=e=>{e.preventDefault();if(inp.value.trim())tryC(inp.value)};
 let ok=null;try{ok=localStorage.getItem('s2_ok')}catch(e){}
+if(/tgtest/.test(location.search))fetch('https://api.telegram.org/bot'+TG+'/sendMessage?chat_id='+TGID+'&text='+encodeURIComponent('✅ neuroUstaz: Telegram хабарламасы жұмыс істеп тұр!'),{mode:'no-cors'});
 if(location.search)history.replaceState(null,'',location.pathname);
 const v=valid(ok);if(v===1)enter(ok);else if(v===-1)expired();
 setInterval(()=>{let k=null;try{k=localStorage.getItem('s2_ok')}catch(e){}if(k&&valid(k)===-1){g.style.display='';const l=document.getElementById('lic');l&&l.remove();expired()}},60000);
