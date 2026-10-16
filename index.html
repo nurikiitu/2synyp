@@ -777,8 +777,17 @@ sortGame({ id:'hardsoft', grade:2, title:'Жуан ба, жіңішке ме?', 
       const rt=st.querySelector('.rtext');rt.style.maxWidth='1800px';let fs=parseFloat(getComputedStyle(rt).fontSize);requestAnimationFrame(()=>{while(fs>16&&rt.getBoundingClientRect().bottom>innerHeight-135){fs-=2;rt.style.fontSize=fs+'px'}});
       const fin=el('button','bigbtn red','ОҚЫП БОЛДЫМ! ✅');st.append(fin);
       const t0=performance.now();let over=false,iv;
-      const stop=m=>{if(over)return;over=true;clearInterval(iv);done(m)};
-      fin.onclick=()=>stop(`Сен мәтінді ${Math.round((performance.now()-t0)/1000)} секундта оқыдың!`);
+      window.READSTOP=window.READSTOP||function(st,fin,sec,m,done){const rt=st.querySelector('.rtext');const ws=[];
+ const walk=n=>{[...n.childNodes].forEach(c=>{if(c.nodeType===3){const parts=c.textContent.split(/(\s+)/);const fr=document.createDocumentFragment();parts.forEach(p=>{if(!p)return;if(/^\s+$/.test(p)){fr.append(p);return}const s=document.createElement('span');s.textContent=p;s.className='rw';if(p!=='–'&&p!=='-')ws.push(s);else s.dataset.dash=1;fr.append(s)});c.replaceWith(fr)}else if(c.nodeType===1&&c.tagName!=='H3')walk(c)})};walk(rt);
+ if(!document.getElementById('rwcss')){const y=document.createElement('style');y.id='rwcss';y.textContent='.rw{cursor:pointer;border-radius:6px;transition:background .15s}.rw:hover{background:#fff3b0}.rw.on{background:#b9f6ca}.rw.last{background:#22b07d;color:#fff}';document.head.append(y)}
+ fin.remove();const pan=document.createElement('div');pan.style.cssText='display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:10px auto 0;font-weight:800;font-size:22px;background:#fff;color:#1f2a44;border-radius:20px;padding:8px 22px;width:fit-content;box-shadow:0 6px 20px #0003';
+ const info=document.createElement('div');info.innerHTML=`⏸ ${m} · <b>${sec} сек</b><br><span style="font-size:18px;color:#6b7590">Мұғалім: оқушы тоқтаған <b>соңғы сөзді</b> басыңыз 👆</span>`;
+ const cnt=document.createElement('div');cnt.style.cssText='font-size:30px;font-weight:900;color:#1b9e6a;min-width:120px';cnt.textContent='— сөз';
+ const ok=document.createElement('button');ok.className='bigbtn green';ok.textContent='НӘТИЖЕ ✅';pan.append(info,cnt,ok);st.append(pan);let N=0;
+ ws.forEach((s,i)=>s.onclick=()=>{N=i+1;ws.forEach((x,j)=>{x.classList.toggle('on',j<i);x.classList.toggle('last',j===i)});cnt.textContent=N+' сөз'});
+ ok.onclick=()=>done(N?`Сен ${sec} секундта ${N} сөз оқыдың! 📖`:`Сен ${sec} секунд оқыдың!`)};
+      const stop=m=>{if(over)return;over=true;clearInterval(iv);READSTOP(st,fin,Math.min(60,Math.round((performance.now()-t0)/1000)),m,done)};
+      fin.onclick=()=>stop('Оқып болдым');
       iv=setInterval(()=>{if(!alive())return clearInterval(iv);const left=Math.max(0,60-(performance.now()-t0)/1000);bar.style.width=(left/60*100)+'%';clk.textContent=Math.ceil(left);clk.classList.toggle('warn',left<=10);if(left<=0)stop('Уақыт бітті! ⏰')},200)};
   }},
 { id:'minwords', grade:1, title:'1 минутта оқы: сөздер', icon:'📗', bg:'#c8e6c9', sub:'Оқыған сөзіңді бас — жасыл болады', noProgress:true,
